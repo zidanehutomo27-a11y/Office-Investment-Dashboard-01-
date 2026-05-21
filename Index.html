@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buyer Cost Analyzer — PT PMA Strata Office Jakarta</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0e0f11;
+  --surface: #16181c;
+  --surface2: #1e2025;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0ece4;
+  --text2: #8a8880;
+  --text3: #555450;
+  --accent: #c8a96e;
+  --accent2: #8fb89a;
+  --red: #e05a5a;
+  --amber: #d4924a;
+  --blue: #5b8fd4;
+  --muted-red: rgba(224,90,90,0.12);
+  --muted-amber: rgba(212,146,74,0.12);
+  --muted-blue: rgba(91,143,212,0.12);
+  --muted-green: rgba(143,184,154,0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+.page { max-width: 900px; margin: 0 auto; padding: 48px 24px 80px; }
+
+/* Header */
+.header { margin-bottom: 48px; border-bottom: 0.5px solid var(--border2); padding-bottom: 32px; }
+.header-eyebrow { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+.header h1 { font-family: 'DM Serif Display', serif; font-size: 36px; font-weight: 400; color: var(--text); line-height: 1.2; margin-bottom: 8px; }
+.header p { font-size: 14px; color: var(--text2); max-width: 480px; }
+.kunci-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; color: var(--accent); border: 0.5px solid var(--accent); padding: 3px 10px; border-radius: 2px; margin-top: 16px; }
+
+/* Controls */
+.controls-card {
+  background: var(--surface);
+  border: 0.5px solid var(--border2);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.controls-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-bottom: 20px; }
+.controls-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+@media(max-width:600px){ .controls-grid { grid-template-columns: 1fr; } }
+.ctrl { display: flex; flex-direction: column; gap: 8px; }
+.ctrl label { font-size: 12px; color: var(--text2); }
+.ctrl-row { display: flex; align-items: center; gap: 10px; }
+.ctrl-row input[type=range] {
+  flex: 1; -webkit-appearance: none; appearance: none;
+  height: 3px; background: var(--border2); border-radius: 2px; outline: none;
+}
+.ctrl-row input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
+  border: 2px solid var(--bg);
+}
+.ctrl-val {
+  font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500;
+  color: var(--accent); min-width: 72px; text-align: right;
+}
+select {
+  background: var(--surface2); border: 0.5px solid var(--border2); color: var(--text);
+  padding: 8px 12px; border-radius: 6px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+  outline: none; cursor: pointer; width: 100%;
+}
+select:focus { border-color: var(--accent); }
+
+/* Summary metrics */
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 12px; margin-bottom: 32px; }
+.metric {
+  background: var(--surface); border: 0.5px solid var(--border);
+  border-radius: 10px; padding: 16px 18px;
+}
+.metric.highlight { border-color: var(--accent); background: rgba(200,169,110,0.06); }
+.metric-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; font-family: 'DM Mono', monospace; letter-spacing: .04em; }
+.metric-val { font-family: 'DM Serif Display', serif; font-size: 22px; color: var(--text); line-height: 1.2; }
+.metric-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+/* Bar chart */
+.chart-section { margin-bottom: 32px; }
+.section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.section-head h2 { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); }
+.section-line { flex: 1; height: 0.5px; background: var(--border); }
+.bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.bar-label { font-size: 12px; color: var(--text2); width: 140px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width .4s ease; }
+.bar-num { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); min-width: 110px; text-align: right; }
+
+/* Cost rows */
+.cost-section { margin-bottom: 28px; }
+.cost-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 8px;
+  border: 0.5px solid var(--border); background: var(--surface);
+  margin-bottom: 6px; transition: border-color .2s;
+}
+.cost-row:hover { border-color: var(--border2); }
+.cost-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.cost-name { flex: 1; font-size: 13px; color: var(--text); }
+.cost-tag {
+  font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .04em;
+  padding: 2px 7px; border-radius: 3px; margin-left: 8px;
+}
+.tag-wajib { background: rgba(224,90,90,0.15); color: #e8908a; }
+.tag-kondisional { background: rgba(212,146,74,0.15); color: #d4924a; }
+.tag-tahunan { background: rgba(91,143,212,0.15); color: #7aaae0; }
+.cost-pct { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text3); min-width: 52px; text-align: right; }
+.cost-val { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--text); min-width: 120px; text-align: right; }
+.cost-basis { font-size: 11px; color: var(--text3); min-width: 140px; text-align: right; }
+.cost-total {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 8px;
+  border: 0.5px solid var(--accent); background: rgba(200,169,110,0.06);
+  margin-top: 10px;
+}
+.cost-total .label { flex: 1; font-size: 13px; font-weight: 500; color: var(--accent); }
+.cost-total .val { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--accent); }
+.note-box {
+  font-size: 12px; color: var(--text2); margin-top: 8px; margin-bottom: 6px;
+  padding: 10px 14px; border-left: 2px solid var(--border2);
+  background: var(--surface); border-radius: 0 6px 6px 0;
+  line-height: 1.6;
+}
+.note-box.warn { border-left-color: var(--amber); }
+.note-box.danger { border-left-color: var(--red); }
+
+/* Footer */
+.footer { margin-top: 48px; padding-top: 24px; border-top: 0.5px solid var(--border); }
+.footer p { font-size: 11px; color: var(--text3); line-height: 1.7; }
+.footer strong { color: var(--text2); font-weight: 500; }
+.disclaimer {
+  margin-top: 12px; padding: 12px 16px;
+  border: 0.5px solid var(--border); border-radius: 8px;
+  background: var(--surface);
+  font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text3);
+  line-height: 1.8;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="header-eyebrow">Kunci Realty — Due Diligence Tool</div>
+    <h1>Buyer Cost Analyzer<br>PT PMA · Strata Office Jakarta</h1>
+    <p>Analisis lengkap beban biaya akuisisi, operasional, dan biaya tersembunyi untuk pembeli entitas PT PMA.</p>
+    <div class="kunci-badge">KUNCI REALTY</div>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-card">
+    <div class="controls-title">Parameter properti</div>
+    <div class="controls-grid">
+      <div class="ctrl">
+        <label>Harga unit (IDR Miliar)</label>
+        <div class="ctrl-row">
+          <input type="range" min="5" max="150" value="20" step="1" id="price-slider">
+          <span class="ctrl-val" id="price-out">20 M</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>Luas unit (sqm)</label>
+        <div class="ctrl-row">
+          <input type="range" min="50" max="2000" value="300" step="10" id="sqm-slider">
+          <span class="ctrl-val" id="sqm-out">300 sqm</span>
+        </div>
+      </div>
+      <div class="ctrl">
+        <label>Status unit</label>
+        <select id="new-unit">
+          <option value="0">Secondary market</option>
+          <option value="1">Baru dari developer</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics" id="metrics-grid"></div>
+
+  <!-- Bar chart -->
+  <div class="chart-section">
+    <div class="section-head">
+      <h2>Perbandingan komponen biaya</h2>
+      <div class="section-line"></div>
+    </div>
+    <div id="bar-chart"></div>
+  </div>
+
+  <!-- Phase 1 -->
+  <div class="cost-section">
+    <div class="section-head">
+      <h2>Fase 1 — Biaya akuisisi (one-time, hari-H closing)</h2>
+      <div class="section-line"></div>
+    </div>
+    <div id="phase1"></div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="cost-section">
+    <div class="section-head">
+      <h2>Fase 2 — Biaya tahunan operasional (recurring)</h2>
+      <div class="section-line"></div>
+    </div>
+    <div id="phase2"></div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="cost-section">
+    <div class="section-head">
+      <h2>Fase 3 — Biaya kondisional &amp; tersembunyi</h2>
+      <div class="section-line"></div>
+    </div>
+    <div id="phase3"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="disclaimer" id="disclaimer-text"></div>
+    <p style="margin-top:16px"><strong>Sumber data:</strong> Colliers Q1 2025 Jakarta Office Report · Real Estate Asia · ATR/BPN · Direktorat Jenderal Pajak · UU Cipta Kerja 2020</p>
+    <p style="margin-top:6px">Dokumen ini bersifat indikatif dan disusun untuk keperluan due diligence awal. Verifikasi wajib dilakukan bersama PPAT, konsultan pajak terdaftar, dan manajemen gedung sebelum transaksi.</p>
+  </div>
+
+</div>
+
+<script>
+const IDR = (n) => {
+  if (n >= 1e9) return 'IDR ' + (n/1e9).toFixed(2).replace(/\.?0+$/, '') + ' M';
+  return 'IDR ' + Math.round(n/1e6).toLocaleString('id-ID') + ' jt';
+};
+const IDR_M = (n) => 'IDR ' + (n/1e9).toFixed(2) + ' M';
+const pct = (p) => p > 0 ? (p*100).toFixed(2) + '%' : '—';
+
+function row(dot, color, name, tag, tagClass, pctVal, val, basis) {
+  return `<div class="cost-row">
+    <div class="cost-dot" style="background:${color}"></div>
+    <span class="cost-name">${name}<span class="cost-tag ${tagClass}">${tag}</span></span>
+    <span class="cost-pct">${pct(pctVal)}</span>
+    <span class="cost-val">${val > 0 ? IDR(val) : '—'}</span>
+    <span class="cost-basis">${basis}</span>
+  </div>`;
+}
+
+function noteBox(text, type) {
+  return `<div class="note-box ${type||''}">${text}</div>`;
+}
+
+function calc() {
+  const priceB = parseFloat(document.getElementById('price-slider').value);
+  const sqm = parseFloat(document.getElementById('sqm-slider').value);
+  const isNew = parseInt(document.getElementById('new-unit').value);
+
+  document.getElementById('price-out').textContent = priceB + ' M';
+  document.getElementById('sqm-out').textContent = sqm.toLocaleString('id-ID') + ' sqm';
+
+  const price = priceB * 1e9;
+
+  // Phase 1
+  const bphtb = 0.05 * Math.max(0, price - 80e6);
+  const notaris = price * 0.0075;
+  const bpn = price * 0.005;
+  const ppn = isNew ? price * 0.11 : 0;
+  const acq = bphtb + notaris + bpn + ppn;
+  const total_day1 = price + acq;
+
+  // Phase 2
+  const sc_annual = 86042 * sqm * 12;
+  const pbb_annual = price * 0.002;
+  const tax_mgt = price * 0.0015;
+  const recurring = sc_annual + pbb_annual + tax_mgt;
+
+  // Phase 3 estimates
+  const fitout_lo = sqm * 2e6;
+  const fitout_hi = sqm * 5e6;
+  const free_rent_loss = sc_annual / 12 * 2;
+  const hgb_renewal = price * 0.035;
+  const pph_sewa_note = '22% dari gross rental income';
+
+  // METRICS
+  document.getElementById('metrics-grid').innerHTML = `
+    <div class="metric"><div class="metric-label">Harga unit</div><div class="metric-val">${IDR_M(price)}</div><div class="metric-sub">${IDR(price/sqm)}/sqm</div></div>
+    <div class="metric"><div class="metric-label">Total biaya akuisisi</div><div class="metric-val">${IDR(acq)}</div><div class="metric-sub">${pct(acq/price)} dari harga jual</div></div>
+    <div class="metric highlight"><div class="metric-label">Total dana hari-H</div><div class="metric-val">${IDR_M(total_day1)}</div><div class="metric-sub">Harus siap lunas saat AJB</div></div>
+    <div class="metric"><div class="metric-label">Beban tahunan (vacant)</div><div class="metric-val">${IDR(recurring)}</div><div class="metric-sub">/tahun jika belum ada tenant</div></div>
+    <div class="metric"><div class="metric-label">SC per bulan</div><div class="metric-val">${IDR(sc_annual/12)}</div><div class="metric-sub">${sqm.toLocaleString()} sqm × IDR 86.042</div></div>
+  `;
+
+  // BARS
+  const bars = [
+    { label: 'Harga unit', val: price, color: '#555450' },
+    { label: 'BPHTB 5%', val: bphtb, color: '#e05a5a' },
+    { label: 'Notaris/PPAT', val: notaris, color: '#d4924a' },
+    { label: 'BPN balik nama', val: bpn, color: '#c8a96e' },
+    ...(isNew ? [{ label: 'PPN 11%', val: ppn, color: '#9b3c3c' }] : []),
+    { label: 'SC tahunan', val: sc_annual, color: '#5b8fd4' },
+    { label: 'PBB tahunan', val: pbb_annual, color: '#3a6ba8' },
+  ];
+  const maxVal = Math.max(...bars.map(b => b.val));
+  document.getElementById('bar-chart').innerHTML = bars.map(b => `
+    <div class="bar-row">
+      <span class="bar-label">${b.label}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(b.val/maxVal*100)}%;background:${b.color}"></div></div>
+      <span class="bar-num">${IDR(b.val)}</span>
+    </div>
+  `).join('');
+
+  // PHASE 1
+  document.getElementById('phase1').innerHTML =
+    row('', '#e05a5a', 'BPHTB', 'wajib', 'tag-wajib', bphtb/price, bphtb, '5% × (harga − IDR 80 jt)') +
+    row('', '#d4924a', 'Notaris + PPAT (PPJB + AJB)', 'wajib', 'tag-wajib', notaris/price, notaris, '~0,75% harga jual') +
+    row('', '#c8a96e', 'BPN balik nama + PNBP', 'wajib', 'tag-wajib', bpn/price, bpn, '~0,5% harga jual') +
+    (isNew
+      ? row('', '#9b3c3c', 'PPN 11% — unit baru dari developer', 'wajib', 'tag-wajib', ppn/price, ppn, '11% harga jual')
+      + noteBox('PPN tidak berlaku untuk secondary market. Pastikan dikonfirmasi ke seller sebelum hitung budget.', 'warn')
+      : row('', '#555450', 'PPN 11%', 'tidak berlaku', 'tag-kondisional', 0, 0, 'Secondary — bebas PPN')
+    ) +
+    `<div class="cost-total"><span class="label">Total dana dibutuhkan hari-H closing</span><span class="val">${IDR_M(total_day1)}</span></div>` +
+    noteBox('PPh Final 2,5% ditanggung <strong>seller</strong> dari harga jual bruto — bukan biaya buyer. Pastikan tidak ada klausul yang menggeser beban ini ke buyer saat negosiasi di meja notaris.', 'warn');
+
+  // PHASE 2
+  document.getElementById('phase2').innerHTML =
+    row('', '#5b8fd4', 'Service charge', 'tahunan', 'tag-tahunan', sc_annual/price, sc_annual, `IDR 86.042/sqm/bln × ${sqm.toLocaleString()} sqm`) +
+    row('', '#3a6ba8', 'PBB (Pajak Bumi dan Bangunan)', 'tahunan', 'tag-tahunan', pbb_annual/price, pbb_annual, '~0,2% NJOP per tahun') +
+    row('', '#555450', 'Tax management fee (opsional)', 'tahunan', 'tag-tahunan', tax_mgt/price, tax_mgt, '~0,15% — jika pakai konsultan') +
+    `<div class="cost-total"><span class="label">Total beban tahunan (tanpa tenant)</span><span class="val">${IDR(recurring)}/th</span></div>` +
+    noteBox('Service charge adalah beban terbesar yang tidak bisa dinegosiasi dan tetap berjalan saat unit <strong>vacant</strong>. Ini cash bleed yang harus diperhitungkan dalam proyeksi yield jika asumsi waktu mendapatkan tenant adalah 6–18 bulan.', 'danger');
+
+  // PHASE 3
+  document.getElementById('phase3').innerHTML =
+    row('', '#d4924a', 'Fit-out (ditanggung tenant)', 'kondisional', 'tag-kondisional', 0, 0, `IDR ${IDR(fitout_lo)} – ${IDR(fitout_hi)} estimasi`) +
+    noteBox('Fit-out ditanggung tenant — bukan biaya langsung buyer. Namun jika tenant default atau keluar prematur, owner menanggung kondisi unit. Negosiasikan kewajiban restore dalam lease agreement.', '') +
+    row('', '#d4924a', 'Free rent / grace period fit-out (1–3 bln)', 'kondisional', 'tag-kondisional', 0, free_rent_loss, `2 bln × ${IDR(sc_annual/12)}/bln SC tetap jalan`) +
+    noteBox('Selama grace period, owner tidak menerima income sewa tetapi SC + PBB tetap berjalan. Harus dimasukkan sebagai biaya implisit dalam hitungan yield riil.', 'warn') +
+    row('', '#8fb89a', 'PPh sewa 22% (jika ada tenant)', 'tahunan', 'tag-tahunan', 0.22, 0, 'dari gross rental income') +
+    noteBox('Ini pajak penghasilan PT PMA atas income sewa — bukan beban ke tenant. Gross yield 5% → net yield efektif ~3,9% sebelum SC dan PBB dikeluarkan dari gross income.', 'danger') +
+    row('', '#555450', 'Perpanjangan HGB (saat jatuh tempo)', 'kondisional', 'tag-kondisional', 0.035, hgb_renewal, '~2–5% NJOP saat diperpanjang') +
+    noteBox('Tidak segera — tergantung sisa masa HGB pada sertifikat. Wajib dicek sebelum beli. Cek tahun berakhir HGB di SHM/SHMSRS dan masukkan biaya ini dalam proyeksi long-term.', '');
+
+  // DISCLAIMER
+  document.getElementById('disclaimer-text').textContent =
+    `Asumsi kalkulasi: Harga unit IDR ${priceB} Miliar · Luas ${sqm.toLocaleString()} sqm · ` +
+    `Status: ${isNew ? 'unit baru dari developer (PPN 11% berlaku)' : 'secondary market (bebas PPN)'} · ` +
+    `Service charge CBD: IDR 86.042/sqm/bulan (Colliers Q4 2024) · ` +
+    `NJOP diasumsikan setara harga transaksi · PBB rate 0,2% · ` +
+    `BPHTB threshold Jakarta: IDR 80 juta.`;
+}
+
+document.getElementById('price-slider').addEventListener('input', calc);
+document.getElementById('sqm-slider').addEventListener('input', calc);
+document.getElementById('new-unit').addEventListener('change', calc);
+calc();
+</script>
+</body>
+</html>
